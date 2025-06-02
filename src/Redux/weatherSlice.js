@@ -1,4 +1,3 @@
-// features/weather/weatherSlice.js
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
 
 const API_KEY = '3f3a6b92bce61cee9365bc8254db8efe';
@@ -38,7 +37,7 @@ const weatherSlice = createSlice({
   initialState: {
     current: null,
     forecast: null,
-    status: 'idle', // idle | loading | succeeded | failed
+    status: 'idle',
     error: null,
     locationError: null,
     weatherError: null,
@@ -51,18 +50,19 @@ const weatherSlice = createSlice({
         state.status = 'loading';
         state.error = null;
         state.locationError = null;
+        state.weatherLoading = true;
       })
       .addCase(fetchWeatherData.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.current = action.payload.current;
         state.forecast = action.payload.forecast;
-        state.weatherLoading = true;
       })
       .addCase(fetchWeatherData.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
         state.locationError = 'Failed to get location';
         state.weatherError = 'Failed to fetch weather data';
+        state.weatherLoading = false;
       });
   },
 });

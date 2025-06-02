@@ -18,26 +18,11 @@ import {useDispatch, useSelector} from 'react-redux';
 import {fetchWeatherData} from '../Redux/weatherSlice';
 const HomeScreen = () => {
   const dispatch = useDispatch();
-  const {
-    currentData,
-    forecastData,
-    current,
-    forecast,
-    status,
-    locationError,
-    error,
-    weatherError,
-    weatherLoading,
-  } = useSelector(state => state.weather);
+  const {current, forecast, status, locationError, error, weatherError} =
+    useSelector(state => state.weather);
   const [refreshing, setRefreshing] = useState(false);
-  //   const [locationError, setLocationError] = useState(null);
-  //   const [weatherData, setWeatherData] = useState(null);
-  //   const [forecastData, setForecastData] = useState(null);
-  const [temperatureUnit, setTemperatureUnit] = useState('metric');
-  //   const [weatherLoading, setWeatherLoading] = useState(false);
-  //   const [weatherError, setWeatherError] = useState(null);
-  const [locationDetail, setLocationDetails] = useState([]);
 
+  const temperatureUnit = 'metric';
   const requestLocationPermission = async () => {
     if (Platform.OS === 'android') {
       try {
@@ -92,49 +77,12 @@ const HomeScreen = () => {
     }
   };
 
-  //   const fetchData = async () => {
-  //     try {
-  //       setWeatherLoading(true);
-  //       setWeatherError(null);
-  //       console.log(locationDetail);
-  //       const lat = locationDetail.latitude;
-  //       const lon = locationDetail.longitude;
-  //       const units = 'metric';
-  //       const API_KEY = '3f3a6b92bce61cee9365bc8254db8efe';
-  //       const currentResponse = await fetch(
-  //         `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=${units}&appid=${API_KEY}`,
-  //       );
-  //       const currentData = await currentResponse.json();
-  //       //   console.log(currentData, '====current weather');
-  //       const forecastResponse = await fetch(
-  //         `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${units}&appid=${API_KEY}`,
-  //       );
-
-  //       const forecastResult = await forecastResponse.json();
-
-  //       if (currentResponse.ok && forecastResponse.ok) {
-  //         setWeatherData(currentData);
-  //         setForecastData(forecastResult);
-  //       } else {
-  //         setWeatherError('Failed to fetch weather data');
-  //       }
-  //     } catch (error) {
-  //       setLocationError('Failed to get location');
-  //       setWeatherError('Failed to fetch weather data');
-  //       console.error('Error fetching data:', error);
-  //     } finally {
-  //       setWeatherLoading(false);
-  //     }
-  //   };
-
   useEffect(() => {
     getCurrentLocation();
-    // fetchData();
   }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // await fetchData();
     setRefreshing(false);
   };
 
@@ -148,12 +96,9 @@ const HomeScreen = () => {
   };
 
   const getNewsFilterDescription = () => {
-    if (!currentData) return '';
+    if (!current) return '';
 
-    const condition = getWeatherCondition(
-      currentData.main.temp,
-      temperatureUnit,
-    );
+    const condition = getWeatherCondition(current.main.temp, temperatureUnit);
 
     switch (condition) {
       case 'cold':
@@ -207,7 +152,7 @@ const HomeScreen = () => {
           </View>
         )}
 
-        {weatherLoading && !refreshing ? (
+        {status === 'loading' && !refreshing ? (
           <ActivityIndicator
             size="large"
             color="#0000ff"
@@ -220,26 +165,26 @@ const HomeScreen = () => {
               <Text style={styles.retryButtonText}>Retry</Text>
             </TouchableOpacity>
           </View>
-        ) : currentData ? (
+        ) : current ? (
           <View style={styles.weatherContainer}>
             {/* Weather Card */}
             <View style={styles.weatherCard}>
               <View style={styles.weatherMain}>
                 <Text style={styles.temperature}>
-                  {Math.round(currentData.main.temp)}
+                  {Math.round(current.main.temp)}
                   {tempSymbol}
                 </Text>
                 <View style={styles.weatherIconContainer}>
-                  {currentData.weather && currentData.weather[0] && (
+                  {current.weather && current.weather[0] && (
                     <>
                       <Image
                         style={styles.weatherIcon}
                         source={{
-                          uri: `https://openweathermap.org/img/wn/${currentData.weather[0].icon}@2x.png`,
+                          uri: `https://openweathermap.org/img/wn/${current.weather[0].icon}@2x.png`,
                         }}
                       />
                       <Text style={styles.weatherDescription}>
-                        {currentData.weather[0].description}
+                        {current.weather[0].description}
                       </Text>
                     </>
                   )}
@@ -250,20 +195,20 @@ const HomeScreen = () => {
                 <View style={styles.weatherDetailItem}>
                   <Text style={styles.weatherDetailLabel}>Feels Like</Text>
                   <Text style={styles.weatherDetailValue}>
-                    {Math.round(currentData.main.feels_like)}
+                    {Math.round(current.main.feels_like)}
                     {tempSymbol}
                   </Text>
                 </View>
                 <View style={styles.weatherDetailItem}>
                   <Text style={styles.weatherDetailLabel}>Humidity</Text>
                   <Text style={styles.weatherDetailValue}>
-                    {currentData.main.humidity}%
+                    {current.main.humidity}%
                   </Text>
                 </View>
                 <View style={styles.weatherDetailItem}>
                   <Text style={styles.weatherDetailLabel}>Wind</Text>
                   <Text style={styles.weatherDetailValue}>
-                    {currentData.wind.speed}{' '}
+                    {current.wind.speed}{' '}
                     {temperatureUnit === 'metric' ? 'm/s' : 'mph'}
                   </Text>
                 </View>
@@ -273,14 +218,14 @@ const HomeScreen = () => {
                 <View style={styles.weatherDetailItem}>
                   <Text style={styles.weatherDetailLabel}>Pressure</Text>
                   <Text style={styles.weatherDetailValue}>
-                    {currentData.main.pressure} hPa
+                    {current.main.pressure} hPa
                   </Text>
                 </View>
                 <View style={styles.weatherDetailItem}>
                   <Text style={styles.weatherDetailLabel}>Visibility</Text>
                   <Text style={styles.weatherDetailValue}>
-                    {currentData.visibility
-                      ? (currentData.visibility / 1000).toFixed(1) + ' km'
+                    {current.visibility
+                      ? (current.visibility / 1000).toFixed(1) + ' km'
                       : 'N/A'}
                   </Text>
                 </View>
@@ -291,12 +236,12 @@ const HomeScreen = () => {
               </View>
 
               <Text style={styles.locationName}>
-                {currentData.name}, {currentData.sys.country}
+                {current.name}, {current.sys.country}
               </Text>
             </View>
 
             {/* Forecast Card */}
-            {forecastData && forecastData.list && (
+            {forecast && forecast.list && (
               <View style={styles.forecastCard}>
                 <Text style={styles.forecastTitle}>5-Day Forecast</Text>
 
@@ -307,7 +252,7 @@ const HomeScreen = () => {
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     style={styles.hourlyScrollView}>
-                    {forecastData.list.slice(0, 8).map((item, index) => (
+                    {forecast.list.slice(0, 8).map((item, index) => (
                       <View key={index} style={styles.hourlyItem}>
                         <Text style={styles.hourlyTime}>
                           {formatTime(item.dt)}
@@ -333,7 +278,7 @@ const HomeScreen = () => {
                 {/* Daily Forecast */}
                 <View style={styles.dailyForecastContainer}>
                   <Text style={styles.sectionTitle}>Daily Forecast</Text>
-                  {forecastData.list
+                  {forecast.list
                     .filter((item, index) => index % 8 === 0)
                     .slice(0, 5)
                     .map((item, index) => (
